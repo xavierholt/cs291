@@ -1,6 +1,6 @@
-let won = false
-let x   = null
-let o   = null
+let live = true
+let x    = null
+let o    = null
 
 function check() {
   const tds = document.getElementsByTagName('TD')
@@ -17,7 +17,7 @@ function check() {
     [2, 4, 6]
   ]
 
-
+  // Detect won games:
   for(const pattern of patterns) {
     let i = pattern[0]
     let j = pattern[1]
@@ -39,10 +39,17 @@ function check() {
       td.appendChild(img.cloneNode())
     }
 
-    won = true
+    live = false
     return
-
   }
+
+  // Detect cats' games:
+  for(const td of tds) {
+    if(!td.hasChildNodes()) return
+  }
+
+  live = false
+  return
 }
 
 function clear() {
@@ -52,6 +59,8 @@ function clear() {
       td.removeChild(td.children[0])
     }
   }
+
+  live = true
 }
 
 function ai() {
@@ -72,7 +81,7 @@ window.onload = function() {
 
   let table = document.getElementById('board')
   table.addEventListener('click', event => {
-    if(!won){
+    if(live){
       if(event.target.tagName == 'TD') {
         if(!event.target.hasChildNodes()) {
           event.target.appendChild(x.cloneNode())
@@ -82,7 +91,6 @@ window.onload = function() {
       }
     }
     else {
-      won = false
       clear()
     }
   })
