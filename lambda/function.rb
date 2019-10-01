@@ -4,10 +4,16 @@ require 'json'
 require 'jwt'
 require 'pp'
 
+def content_type(event)
+  event['headers'].each do |header, value|
+    return value if header =~ /\Acontent-type\Z/i
+  end
+end
+
 def token(event)
   if event['httpMethod'] != 'POST'
     return response(status: 405)
-  elsif event.dig('headers', 'Content-Type') != 'application/json'
+  elsif content_type(event) != 'application/json'
     return response(status: 415)
   end
 
@@ -65,7 +71,7 @@ if $PROGRAM_NAME == __FILE__
   # Call /token
   PP.pp main(context: {}, event: {
     'body'       => '{"name": "bboe"}',
-    'headers'    => {'Content-Type' => 'application/json'},
+    'headers'    => {'ConTent-Type' => 'application/json'},
     'httpMethod' => 'POST',
     'path'       => '/token'
   })
