@@ -13,7 +13,7 @@ def token(event)
 
   time = Time.now.to_i
   data = JSON.decode(event['body'])
-  response(status: 200, body: {
+  response(status: 201, body: {
     token: JWT.encode({data: data, nbf: time-2, exp: time+5}, ENV['JWT_SECRET'], 'HS256')
   })
 rescue
