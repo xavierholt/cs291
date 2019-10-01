@@ -18,11 +18,11 @@ def token(event)
   end
 
   time = Time.now.to_i
-  data = JSON.decode(event['body'])
+  data = JSON.parse(event['body'])
   response(status: 201, body: {
     token: JWT.encode({data: data, nbf: time-2, exp: time+5}, ENV['JWT_SECRET'], 'HS256')
   })
-rescue
+rescue TypeError
   response(status: 422)
 end
 
