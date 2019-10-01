@@ -22,7 +22,7 @@ def token(event)
   response(status: 201, body: {
     token: JWT.encode({data: data, nbf: time-2, exp: time+5}, ENV['JWT_SECRET'], 'HS256')
   })
-rescue TypeError
+rescue JSON::ParserError
   response(status: 422)
 end
 
