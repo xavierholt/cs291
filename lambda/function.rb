@@ -6,8 +6,8 @@ require 'pp'
 
 def header(event, key)
   key = key.downcase
-  event['headers'].each do |header, value|
-    return value if header.downcase == key
+  event['headers'].each do |k, v|
+    return v if k.downcase == key
   end
 end
 
@@ -28,6 +28,8 @@ rescue JSON::ParserError
 end
 
 def root(event)
+  # puts event
+
   if event['httpMethod'] != 'GET'
     return response(status: 405)
   end
@@ -38,7 +40,7 @@ def root(event)
   end
 
   data = JWT.decode(token.sub('Bearer ', ''), ENV['JWT_SECRET'], true)
-  puts data
+  # puts data
   response(status: 200, body: data.dig(0, 'data'))
 rescue JWT::ExpiredSignature, JWT::ImmatureSignature
   response(status: 401)
