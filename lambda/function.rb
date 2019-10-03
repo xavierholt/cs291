@@ -4,16 +4,17 @@ require 'json'
 require 'jwt'
 require 'pp'
 
-def content_type(event)
+def header(event, key)
+  key = key.downcase
   event['headers'].each do |header, value|
-    return value if header =~ /\Acontent-type\Z/i
+    return value if header.downcase == key
   end
 end
 
 def token(event)
   if event['httpMethod'] != 'POST'
     return response(status: 405)
-  elsif content_type(event) != 'application/json'
+  elsif header(event, 'content-type') != 'application/json'
     return response(status: 415)
   end
 
@@ -31,12 +32,13 @@ def root(event)
     return response(status: 405)
   end
 
-  token = event.dig('headers', 'Authorization')
+  token = header(event, 'authorization')
   if token.nil? or not token.start_with?('Bearer ')
     return response(status: 403)
   end
 
   data = JWT.decode(token.sub('Bearer ', ''), ENV['JWT_SECRET'], true)
+  puts data
   response(status: 200, body: data.dig(0, 'data'))
 rescue JWT::ExpiredSignature, JWT::ImmatureSignature
   response(status: 401)
