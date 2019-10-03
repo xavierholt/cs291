@@ -32,15 +32,16 @@ def root(event)
   end
 
   token = event.dig('headers', 'Authorization')
-  if not token or not token.start_with?('Bearer ')
+  if token.nil? or not token.start_with?('Bearer ')
     return response(status: 403)
   end
 
-  time = Time.now.to_i
   data = JWT.decode(token.sub('Bearer ', ''), ENV['JWT_SECRET'], true)
   response(status: 200, body: data.dig(0, 'data'))
-rescue JWT::ExpiredSignature
+rescue JWT::ExpiredSignature, JWT::ImmatureSignature
   response(status: 401)
+rescue JWT::DecodeError
+  response(status: 403)
 end
 
 def main(event:, context:)
