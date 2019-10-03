@@ -23,7 +23,7 @@ def token(event)
   time = Time.now.to_i
   data = JSON.parse(event['body'].to_s)
   response(status: 201, body: {
-    token: JWT.encode({data: data, nbf: time-2, exp: time+5}, ENV['JWT_SECRET'], 'HS256')
+    token: JWT.encode({data: data, nbf: time+2, exp: time+5}, ENV['JWT_SECRET'], 'HS256')
   })
 rescue JSON::ParserError
   response(status: 422)
