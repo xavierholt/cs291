@@ -9,6 +9,8 @@ def header(event, key)
   event['headers'].each do |k, v|
     return v if k.downcase == key
   end
+
+  return ''
 end
 
 def token(event)
@@ -28,19 +30,16 @@ rescue JSON::ParserError
 end
 
 def root(event)
-  # puts event
-
   if event['httpMethod'] != 'GET'
     return response(status: 405)
   end
 
   token = header(event, 'authorization')
-  if token.nil? or not token.start_with?('Bearer ')
+  unless token.start_with?('Bearer ')
     return response(status: 403)
   end
 
   data = JWT.decode(token.sub('Bearer ', ''), ENV['JWT_SECRET'], true)
-  # puts data
   response(status: 200, body: data.dig(0, 'data'))
 rescue JWT::ExpiredSignature, JWT::ImmatureSignature
   response(status: 401)
