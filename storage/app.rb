@@ -8,12 +8,12 @@ bucket  = storage.bucket('cs291_project2', skip_lookup: true)
 
 def sha2url(sha)
   sha.downcase!
-  halt 422 if sha !~ /\A[0-9a-f]{64}\Z/
+  halt 422 if sha !~ /\A\h{64}\Z/
   "#{sha[0..1]}/#{sha[2..3]}/#{sha[4..63]}"
 end
 
 def url2sha(url)
-  url.gsub('/', '')
+  url.gsub('/', '') if url =~ /\A\h\h\/\h\h\/\h{60}\Z/
 end
 
 get '/' do
@@ -22,15 +22,13 @@ end
 
 get '/files/' do
   response['Content-Type'] = 'application/json'
-  JSON.dump(bucket.files.map {|file| url2sha(file.name)})
+  names = bucket.files.map {|file| url2sha(file.name)}
+  JSON.dump(names.compact)
 end
 
 post '/files/' do
   file = params[:file]
-  return 422 if file.nil?
-  puts file.inspect
-
-  data = file[:tempfile].read
+  data = file[:tempfile].read rescue halt(422)
   return 422 if data.length > 1024 ** 2
 
   sha = Digest::SHA256.hexdigest(data)
